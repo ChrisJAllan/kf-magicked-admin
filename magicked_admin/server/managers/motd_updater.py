@@ -4,10 +4,11 @@ import requests
 import time
 import logging
 import sys
+import re
 
 from lxml import html
 from utils.text import millify
-from utils.text import trim_string
+from utils.text import trim_string, visual_ljust, visual_rjust
 
 logger = logging.getLogger(__name__)
 if __debug__ and not hasattr(sys, 'frozen'):
@@ -75,6 +76,8 @@ class MotdUpdater(threading.Thread):
             scores = self.server.database.top_dosh()
         elif self.scoreboard_type in ['KD', 'kd']:
             scores = self.server.database.top_kd()
+        elif self.scoreboard_type in ['Multi', 'multi']:
+            return self.render_motd_multi(src_motd)
         else:
             logger.error("Bad configuration, scoreboard_type. "
                          "Options are: dosh, kills ({})"
@@ -97,6 +100,42 @@ class MotdUpdater(threading.Thread):
             server_dosh = self.server.database.server_dosh()
             src_motd = src_motd.replace("%SRV_D", millify(server_dosh), 1)
 
+        return src_motd
+
+    def render_motd_multi(self, src_motd):
+        top_kills = self.server.database.top_kills()
+        top_dosh = self.server.database.top_dosh()
+        top_kd = self.server.database.top_kd()
+        
+        for m in re.finditer('%(\w+)\[(\d+)\]\.(\w+)(?::([<>])?(\d+))?%', src_motd):
+            player = {
+                'kills': top_kills,
+                'dosh': top_dosh,
+                'kd': top_kd
+            }.get(m.group(1), ['', 0])[int(m.group(2))]
+            
+            replacement = {
+                'name': player[0].replace("<", "&lt;"),
+                'score': '{0}'.format(player[1])
+            }.get(m.group(3), [''])
+            
+            if (m.group(5)):
+                replacement = {
+                    '<': visual_ljust(replacement, int(m.group(5))),
+                    None: visual_ljust(replacement, int(m.group(5))),
+                    '>': visual_rjust(replacement, int(m.group(5)))
+                }.get(m.group(4))
+            
+            src_motd = src_motd.replace(m.group(0), replacement);
+        
+        if "%SRV_K" in src_motd:
+            server_kills = self.server.database.server_kills()
+            src_motd = src_motd.replace("%SRV_K", millify(server_kills), 1)
+
+        if "%SRV_D" in src_motd:
+            server_dosh = self.server.database.server_dosh()
+            src_motd = src_motd.replace("%SRV_D", millify(server_dosh), 1)
+        
         return src_motd
 
     def get_configuration(self):

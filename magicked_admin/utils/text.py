@@ -1,5 +1,5 @@
 import math
-
+import re
 
 def millify(n):
     millnames = ['', 'K', 'M', 'B', 'T']
@@ -16,6 +16,12 @@ def trim_string(input_str, length):
     return (input_str[:length-2] + '..') if len(input_str) > length \
         else input_str
 
+# Attempts to pad a string in non-monospace fonts. Assumes "ilt " are all half-width.
+def visual_ljust(string, length):
+    return string.ljust(len(string) + 2 * (length - len(string)) + len(re.findall("[ilt ]", string)))
+
+def visual_rjust(string, length):
+    return string.rjust(len(string) + 2 * (length - len(string)) + len(re.findall("[ilt ]", string)))
 
 def str_to_bool(s):
     if s in ['True', 'true', '1']:
