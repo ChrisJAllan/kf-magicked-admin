@@ -93,6 +93,11 @@ class ServerDatabase:
         all_rows = self.cur.fetchall()
         return all_rows
 
+    def top_kd(self):
+        self.cur.execute('SELECT username, (kills/deaths) FROM players ORDER BY (kills/deaths) DESC')
+        all_rows = self.cur.fetchall()
+        return all_rows
+
     def player_dosh(self, username):
         self.cur.execute('SELECT (dosh) FROM players WHERE username=?',
                          (username,))

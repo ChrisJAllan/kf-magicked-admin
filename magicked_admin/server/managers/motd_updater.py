@@ -73,6 +73,8 @@ class MotdUpdater(threading.Thread):
             scores = self.server.database.top_kills()
         elif self.scoreboard_type in ['Dosh','dosh']:
             scores = self.server.database.top_dosh()
+        elif self.scoreboard_type in ['KD', 'kd']:
+            scores = self.server.database.top_kd()
         else:
             logger.error("Bad configuration, scoreboard_type. "
                          "Options are: dosh, kills ({})"
