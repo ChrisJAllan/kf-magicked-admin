@@ -113,10 +113,11 @@ class MotdUpdater(threading.Thread):
 
         banner_link = motd_tree.xpath('//input[@name="BannerLink"]/@value')[0] 
         web_link = motd_tree.xpath('//input[@name="WebLink"]/@value')[0]
+        motto = motd_tree.xpath('//textarea[@name="ClanMotto"]')[0].text
 
         return {
                 'BannerLink': banner_link,
-                'ClanMotto': '',
+                'ClanMotto': motto,
                 'ClanMottoColor': '#FF0000',
                 'ServerMOTDColor': '#FF0000',
                 'WebLink': web_link,
